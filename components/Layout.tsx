@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BLOG_NAME } from '../constants';
 
 const Layout: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { pathname, hash } = useLocation();
@@ -48,9 +50,15 @@ const Layout: React.FC = () => {
     document.documentElement.classList.toggle('dark');
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'ne' : 'en';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
+
   const navLinks = [
-    { name: 'Logs', path: '/articles' },
-    { name: 'About', path: '/about' },
+    { name: t('nav.articles'), path: '/articles' },
+    { name: t('nav.about'), path: '/about' },
   ];
 
   return (
@@ -89,6 +97,15 @@ const Layout: React.FC = () => {
             ))}
             
             <button 
+              onClick={toggleLanguage}
+              className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 px-3"
+              aria-label="Toggle language"
+            >
+              <Languages size={18} />
+              <span className="text-xs font-bold">{i18n.language === 'en' ? 'नेपाली' : 'English'}</span>
+            </button>
+
+            <button 
               onClick={toggleTheme}
               className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               aria-label="Toggle theme"
@@ -98,7 +115,15 @@ const Layout: React.FC = () => {
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center space-x-4 md:hidden">
+          <div className="flex items-center space-x-2 md:hidden">
+            <button 
+              onClick={toggleLanguage}
+              className="p-2 text-slate-600 dark:text-slate-400 flex items-center gap-1"
+              aria-label="Toggle language"
+            >
+              <Languages size={18} />
+              <span className="text-[10px] font-bold">{i18n.language === 'en' ? 'NP' : 'EN'}</span>
+            </button>
             <button 
               onClick={toggleTheme}
               className="p-2 text-slate-600 dark:text-slate-400"

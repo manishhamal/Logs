@@ -1,13 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
-import { ARTICLES } from '../constants';
+import { Article } from '../types';
+import { articleService } from '../services/articleService';
+import { useTranslation } from 'react-i18next';
 
 const ArticleDetail: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const article = ARTICLES.find((a) => a.id === id);
+  const [article, setArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
   const [readingProgress, setReadingProgress] = useState(0);
+
+  const isNepali = i18n.language === 'ne';
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      if (!id) return;
+      try {
+        const data = await articleService.getArticleById(id);
+        if (data) {
+          setArticle(data);
+        }
+      } catch (error) {
+        console.error('Error fetching article:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [id]);
 
   useEffect(() => {
     const updateScrollProgress = () => {
@@ -29,16 +53,27 @@ const ArticleDetail: React.FC = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-slate-400" size={48} />
+      </div>
+    );
+  }
+
   if (!article) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center">
-        <h2 className="text-3xl font-bold mb-4 font-sans">Article Not Found</h2>
-        <Link to="/articles" className="text-slate-900 hover:underline flex items-center">
-          <ArrowLeft size={16} className="mr-2" /> Back to Articles
+        <h2 className="text-3xl font-bold mb-4 font-sans">{isNepali ? "लेख फेला परेन" : "Article Not Found"}</h2>
+        <Link to="/articles" className="text-slate-900 dark:text-white hover:underline flex items-center font-bold">
+          <ArrowLeft size={16} className="mr-2" /> {t('articleDetail.backToArticles')}
         </Link>
       </div>
     );
   }
+
+  const title = isNepali && article.titleNe ? article.titleNe : article.title;
+  const content = isNepali && article.contentNe ? article.contentNe : article.content;
 
   return (
     <>
@@ -54,7 +89,7 @@ const ArticleDetail: React.FC = () => {
         {/* Back Link */}
         <FadeIn>
           <Link to="/articles" className="inline-flex items-center text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 mb-12 transition-colors">
-            <ArrowLeft size={16} className="mr-2" /> Back to Articles
+            <ArrowLeft size={16} className="mr-2" /> {t('articleDetail.backToArticles')}
           </Link>
         </FadeIn>
 
@@ -67,8 +102,8 @@ const ArticleDetail: React.FC = () => {
               </span>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-6 leading-none">
-              {article.title}
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mb-6 leading-[1.1]">
+              {title}
             </h1>
           </header>
         </FadeIn>
@@ -79,7 +114,7 @@ const ArticleDetail: React.FC = () => {
             <div className="mb-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900">
               <img 
                 src={article.featuredImage} 
-                alt={article.title} 
+                alt={title} 
                 className="w-full h-auto object-cover max-h-[500px]"
               />
             </div>
@@ -95,16 +130,30 @@ const ArticleDetail: React.FC = () => {
             prose-a:font-medium prose-a:text-slate-900 dark:prose-a:text-white prose-a:no-underline prose-a:border-b prose-a:border-slate-300 dark:prose-a:border-slate-600 hover:prose-a:border-slate-900 dark:hover:prose-a:border-white prose-a:transition-colors
             prose-img:rounded-xl prose-img:grayscale hover:prose-img:grayscale-0 prose-img:transition-all
             lead:text-xl lead:font-sans lead:text-slate-600 dark:lead:text-slate-300"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: content }}
           />
         </FadeIn>
 
-        {/* Date at the end */}
+        {/* Date and Tags at the end */}
         <FadeIn delay={400}>
-          <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800">
-             <p className="text-sm font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-               Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          <div className="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start gap-4">
+             <p className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                {isNepali ? "प्रकाशित मिति: " : "Published on "} 
+                {new Date(article.date).toLocaleDateString(isNepali ? 'ne-NP' : 'en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
              </p>
+             {article.tags && article.tags.length > 0 && (
+               <div className="flex flex-wrap gap-2">
+                 {(isNepali && article.tagsNe && article.tagsNe.length > 0 ? article.tagsNe : article.tags).map(tag => (
+                   <span key={tag} className="px-2 py-1 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded">
+                     #{tag}
+                   </span>
+                 ))}
+               </div>
+             )}
           </div>
         </FadeIn>
       </article>

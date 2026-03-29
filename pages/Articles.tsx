@@ -1,17 +1,38 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import FadeIn from '../components/FadeIn';
-import { ARTICLES } from '../constants';
-import { Category } from '../types';
+import { Category, Article } from '../types';
+import { articleService } from '../services/articleService';
+import { useTranslation } from 'react-i18next';
 
 const Articles: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
   
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>(categoryParam || Category.All);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const isNepali = i18n.language === 'ne';
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const data = await articleService.getArticles();
+        setArticles(data);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
 
   // Sync state with URL param if it changes externally
   useEffect(() => {
@@ -23,13 +44,19 @@ const Articles: React.FC = () => {
   }, [categoryParam]);
 
   const filteredArticles = useMemo(() => {
-    return ARTICLES.filter((article) => {
+    return articles.filter((article) => {
       const matchesCategory = activeCategory === Category.All || article.category === activeCategory;
-      const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const title = isNepali && article.titleNe ? article.titleNe : article.title;
+      const excerpt = isNepali && article.excerptNe ? article.excerptNe : article.excerpt;
+      
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = title.toLowerCase().includes(query) || 
+                            excerpt.toLowerCase().includes(query);
+      
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [articles, activeCategory, searchQuery, isNepali]);
 
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
@@ -38,6 +65,15 @@ const Articles: React.FC = () => {
       setSearchParams(searchParams);
     } else {
       setSearchParams({ category: cat });
+    }
+  };
+
+  const getCategoryTranslationKey = (cat: string) => {
+    switch (cat) {
+      case Category.History: return 'category.history';
+      case Category.Technology: return 'category.technology';
+      case Category.Politics: return 'category.politics';
+      default: return 'category.all';
     }
   };
 
@@ -57,7 +93,7 @@ const Articles: React.FC = () => {
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
-                  {cat}
+                  {t(getCategoryTranslationKey(cat))}
                 </button>
               ))}
             </div>
@@ -65,7 +101,7 @@ const Articles: React.FC = () => {
             <div className="relative w-full md:w-56">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={isNepali ? "खोज्नुहोस्..." : "Search..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent border-b border-slate-200 dark:border-slate-800 py-1 pl-0 pr-6 text-sm focus:outline-none focus:border-slate-900 dark:focus:border-slate-100 placeholder:text-slate-300"
@@ -76,7 +112,11 @@ const Articles: React.FC = () => {
         </div>
       </FadeIn>
 
-      {filteredArticles.length > 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="animate-spin text-slate-400" size={32} />
+        </div>
+      ) : filteredArticles.length > 0 ? (
         <div className="space-y-12">
           {filteredArticles.map((article, index) => (
             <FadeIn key={article.id} delay={index * 50}>
@@ -85,13 +125,13 @@ const Articles: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center text-slate-500 font-mono text-sm">
-          <p>No entries found.</p>
+        <div className="py-20 text-center text-slate-500 font-sans text-sm">
+          <p>{t('articles.noArticles')}</p>
           <button 
             onClick={() => {setSearchQuery(''); setActiveCategory(Category.All)}}
-            className="mt-4 text-slate-900 dark:text-slate-100 hover:underline"
+            className="mt-4 text-slate-900 dark:text-slate-100 hover:underline font-bold"
           >
-            Clear filters
+            {isNepali ? "फिल्टरहरू हटाउनुहोस्" : "Clear filters"}
           </button>
         </div>
       )}
