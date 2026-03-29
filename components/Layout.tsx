@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Languages } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BLOG_NAME } from '../constants';
 
@@ -98,11 +98,10 @@ const Layout: React.FC = () => {
             
             <button 
               onClick={toggleLanguage}
-              className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 px-3"
+              className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors px-2 py-1"
               aria-label="Toggle language"
             >
-              <Languages size={18} />
-              <span className="text-xs font-bold">{i18n.language === 'en' ? 'नेपाली' : 'English'}</span>
+              {i18n.language === 'en' ? 'np' : 'en'}
             </button>
 
             <button 
@@ -118,11 +117,10 @@ const Layout: React.FC = () => {
           <div className="flex items-center space-x-2 md:hidden">
             <button 
               onClick={toggleLanguage}
-              className="p-2 text-slate-600 dark:text-slate-400 flex items-center gap-1"
+              className="p-2 text-xs font-bold uppercase tracking-widest text-slate-400"
               aria-label="Toggle language"
             >
-              <Languages size={18} />
-              <span className="text-[10px] font-bold">{i18n.language === 'en' ? 'NP' : 'EN'}</span>
+              {i18n.language === 'en' ? 'np' : 'en'}
             </button>
             <button 
               onClick={toggleTheme}
