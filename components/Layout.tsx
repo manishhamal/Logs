@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BLOG_NAME } from '../constants';
 
@@ -96,12 +96,14 @@ const Layout: React.FC = () => {
               </NavLink>
             ))}
             
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
+
             <button 
               onClick={toggleLanguage}
-              className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors px-2 py-1"
+              className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
               aria-label="Toggle language"
             >
-              {i18n.language === 'en' ? 'np' : 'en'}
+              <Languages size={18} />
             </button>
 
             <button 
@@ -117,10 +119,10 @@ const Layout: React.FC = () => {
           <div className="flex items-center space-x-2 md:hidden">
             <button 
               onClick={toggleLanguage}
-              className="p-2 text-xs font-bold uppercase tracking-widest text-slate-400"
+              className="p-2 text-slate-600 dark:text-slate-400"
               aria-label="Toggle language"
             >
-              {i18n.language === 'en' ? 'np' : 'en'}
+               <Languages size={20} />
             </button>
             <button 
               onClick={toggleTheme}
