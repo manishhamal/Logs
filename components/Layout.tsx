@@ -26,10 +26,16 @@ const Layout: React.FC = () => {
   }, [pathname, hash]);
 
   useEffect(() => {
+    // Check localStorage first, then system preference
+    const savedTheme = localStorage.getItem('theme');
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (isSystemDark) {
+    
+    if (savedTheme === 'dark' || (!savedTheme && isSystemDark)) {
       setIsDark(true);
       document.documentElement.classList.add('dark');
+    } else {
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
@@ -46,8 +52,10 @@ const Layout: React.FC = () => {
   }, [isMenuOpen]);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
+    const newDark = !isDark;
+    setIsDark(newDark);
+    document.documentElement.classList.toggle('dark', newDark);
+    localStorage.setItem('theme', newDark ? 'dark' : 'light');
   };
 
   const toggleLanguage = () => {
