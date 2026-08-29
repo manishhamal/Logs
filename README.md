@@ -2,19 +2,17 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Logs
 
-This contains everything you need to run your app locally.
+This is a personal open record of perspectives, writings, and thoughts.
 
-View your app in AI Studio: https://ai.studio/apps/b0cea2b8-a05d-4f7c-9379-4ef8e53c591b
+## Tech Stack
+- Built with modern web technologies.
 
-## Run Locally
+## About
+I write on this blog to share different perspectives, explore thoughts through writing, and encourage dialogue.
 
-**Prerequisites:**  Node.js
+## Contact
+You can reach out via email at manish@hamal.dev.
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
